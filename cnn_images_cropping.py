@@ -5,12 +5,20 @@ from pathlib import Path
 
 
 def load_img(path):
+    """
+    loads image and changes channel colour
+    """
     img = cv2.imread(path)
     rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img, rgb
 
 
 def convert_and_trim_bb(image, rect):
+    """
+    reads bounding box corner coordinates
+    and converts it to coordinates of left upper corner
+    and width and height
+    """
     # extract the starting and ending (x, y)-coordinates of the
     # bounding box
     startX = rect.left()
@@ -29,25 +37,33 @@ def convert_and_trim_bb(image, rect):
     # return our bounding box coordinates
     return (startX, startY, w, h)
 
+
 def cnn_crop(path, save_path):
+    """
+    detects face from image using cnn algorithm
+    """
     img, rgb = load_img(path)
-    cnn_detector = dlib.cnn_face_detection_model_v1('mmod_human_face_detector.dat')
+    cnn_detector = dlib.cnn_face_detection_model_v1("mmod_human_face_detector.dat")
     cnn_rects = cnn_detector(rgb, 1)
 
-    cnn_boxes = [convert_and_trim_bb(img, r.rect) for r in cnn_rects]
+    cnn_boxes = [convert_and_trim_bb(img, r.rect) for r in cnn_rects] # coordinates of faces bb
     count = 0
     filename = Path(path).stem
 
-    for (x, y, w, h) in cnn_boxes:
+    # in case there are multiple faces in the picture
+    for x, y, w, h in cnn_boxes:
         img_new = img.copy()
-        img_new = img_new[y:y+h, x:x+w]
+        img_new = img_new[y : y + h, x : x + w]
         # Creates a new file
-        with open(f'{save_path}{filename}_{count}.png', 'w') as fp:
+        with open(f"{save_path}{filename}_{count}.png", "w") as fp:
             pass
-        cv2.imwrite(f'{save_path}{filename}_{count}.png', img_new)
+        cv2.imwrite(f"{save_path}{filename}_{count}.png", img_new)
         count += 1
 
-images_path = 'test_images/test_images2/'
-save_path = 'faces/'
-for file in os.listdir(images_path):
-    cnn_crop(images_path+file, save_path)
+
+if __name__ == "__main__":
+    images_path = "../ExpW_test/images/"
+    save_path = "faces/" # @TODO: zrob ladniej bo teraz trzeba dodawac samemu z lapy
+    for file in os.listdir(images_path):
+        print(file, images_path)
+        cnn_crop(images_path + file, save_path)
