@@ -1,0 +1,4 @@
+/checkpoint
+/pretrain
+*.pyc
+*-log.txt
