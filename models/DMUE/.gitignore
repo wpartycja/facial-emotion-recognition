@@ -1,0 +1,7 @@
+/weights
+/preprocess/face_alignmenet/ckpt
+/models/__pycache__
+/images
+/__pycache__
+/datasets/__pycache__
+/checkpoints
