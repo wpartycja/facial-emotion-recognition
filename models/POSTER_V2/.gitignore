@@ -2,3 +2,4 @@
 /pretrain
 *.pyc
 *-log.txt
+/log
