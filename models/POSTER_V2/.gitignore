@@ -1,5 +1,3 @@
 /checkpoint
 /pretrain
 *.pyc
-*-log.txt
-/log
