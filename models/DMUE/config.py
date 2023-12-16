@@ -20,8 +20,8 @@ def parse_lb_txt(filename):
 class Config:
     num_classes = 8
     ori_shape = (256, 256)
-    label_path = "/path/to/your/lb2.txt"
-    lmdb_f = "/path/to/your/AffectNet_lmdb/"
+    label_path = "./msra_train_file.txt"
+    lmdb_f = "/AffectNet_lmdb/"
 
     train_dataset, val_dataset = parse_lb_txt(label_path)
     w, T = 0.5, 1.2
