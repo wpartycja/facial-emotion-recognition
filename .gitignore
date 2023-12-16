@@ -1,2 +1,3 @@
 coords.txt
+/__pycache__
 /affectnet_experiments/*.csv
