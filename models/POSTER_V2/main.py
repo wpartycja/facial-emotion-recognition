@@ -322,8 +322,9 @@ def validate(val_loader, model, criterion, args):
 def save_checkpoint(state, is_best, args):
     torch.save(state, args.checkpoint_path)
     if is_best:
-        best_state = state.pop('optimizer')
-        torch.save(best_state, args.best_checkpoint_path)
+        # best_state = state.pop('optimizer')
+        # torch.save(best_state, args.best_checkpoint_path)
+        torch.save(state, args.best_checkpoint_path)
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
