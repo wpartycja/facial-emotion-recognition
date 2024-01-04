@@ -1,0 +1,2 @@
+Current learning rate: 3.5e-05
+Epoch: [0][   0/1232]	Loss 2.3834 (2.1772)	Accuracy  5.455 ( 4.545)
