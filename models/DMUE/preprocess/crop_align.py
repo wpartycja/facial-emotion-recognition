@@ -8,13 +8,13 @@ from mtcnn import MTCNN
 from face_alignmenet.get_landmark import *
 
 
-img_root  = '/path/to/your/AffectNet_root'
-save_root = '/path/to/your/align_larger_256'
+img_root  = '../ExpW-mini'              # '/path/to/your/AffectNet_root'
+save_root = '../Expw-mini_aligned'      # /path/to/your/align_larger_256'
 
-missed_img_txt = '/path/to/your/missed_img.txt'
+missed_img_txt = '../missed.txt'
 
-lb_txt  = '/path/to/your/AffectNet_label_file.txt'
-lb2_txt = '/path/to/your/lb2.txt'
+lb_txt  = '../lb.txt'
+lb2_txt = '../lb2.txt'
 
 
 mtcnn = MTCNN(keep_all=True)

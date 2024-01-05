@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 
 from models.make_target_model import make_target_model
-
+import time
 
 class Config:
     pass
@@ -19,7 +19,8 @@ cfg.last_stride = 2
 cfg.num_classes = 8
 cfg.num_branches = cfg.num_classes + 1
 cfg.backbone = 'resnet18' # 'resnet18', 'resnet50_ibn'
-cfg.pretrained = "./weights/AffectNet_res18_acc0.6285.pth"
+# cfg.pretrained = "./weights/AffectNet_res18_acc0.6285.pth"
+cfg.pretrained = "./weights/ExpW_res18_acc.pth"
 cfg.pretrained_choice = '' # '' or 'convert'
 cfg.bnneck = True  
 cfg.BiasInCls = False
@@ -40,6 +41,7 @@ def inference(model, img_path, transform, is_cuda=True):
     idx  = torch.argmax(prob.cpu()).item()
 
     key = {0: 'Neutral', 1:'Happy', 2:'Sad', 3:'Surprise', 4:'Fear', 5:'Disgust', 6:'Anger', 7:'Contempt'}
+
     print('Predicted: {}'.format(key[idx]))
     print('Probabilities:')
     for i in range(cfg.num_classes):
@@ -60,6 +62,8 @@ if __name__ == '__main__':
     model = make_target_model(cfg)
     model.load_param(cfg)
     print('Loaded pretrained model from {0}'.format(cfg.pretrained))
-
+    start = time.time()
     inference(model, img_path, transform, is_cuda=True)
+    end = time.time()
+    print(end - start)
     

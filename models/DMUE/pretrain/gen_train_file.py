@@ -14,6 +14,6 @@ def gen_train_file(data_root, train_file):
             train_file_buf.write(line + '\n')
     
 if __name__ == '__main__':
-    data_root = "../../../datasets/ExpW-mini/train"
+    data_root = "/path/to/your/cropped_msra"
     tain_file = './msra_train_file.txt'
     gen_train_file(data_root, tain_file)

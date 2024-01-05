@@ -6,22 +6,25 @@ def parse_lb_txt(filename):
     lines = open(filename, 'r').readlines()
     train_dataset, test_dataset = [], []
     for line in lines:
-        key, label = line.split(' ')[0], line[-2]
+        # key, label = line.split(' ')[0], line[-2]
+        key, label = line.split(' ') 
+        # img_path =  '_'.join(key.split('_')[1:]) # hit jakis
         label = int(label)
-        mode, img_path = key.split('_') #
+        mode = key.split('_')[0]
+        # mode, img_path = key.split('_')
         if mode == 'train':
             train_dataset.append([key, label])
-        elif mode == 'test':
+        elif mode == 'valid':
             test_dataset.append([key, label])
 
     return train_dataset, test_dataset
 
 
 class Config:
-    num_classes = 8
+    num_classes = 7
     ori_shape = (256, 256)
-    label_path = "./msra_train_file.txt"
-    lmdb_f = "/AffectNet_lmdb/"
+    label_path = "lb2.txt"
+    lmdb_f = "ExpW_lmdb"
 
     train_dataset, val_dataset = parse_lb_txt(label_path)
     w, T = 0.5, 1.2
@@ -41,7 +44,7 @@ class Config:
     second_order_statics = 'mean' # all, mean, var
     # -----------saving dirs-------#
     ckpt_root_dir = './checkpoints'
-    output_dir = 'AffectNet_res18'
+    output_dir = 'ExpW_res18'
     # ---------------------------------------------------------------------------- #
     # Input
     # ---------------------------------------------------------------------------- #
@@ -66,7 +69,7 @@ class Config:
     # Optimizer
     # ---------------------------------------------------------------------------- #
     start_epoch = 0
-    max_epoch = 36 
+    max_epoch = 10
     weight_decay = 1e-4
 
     # set different lr to the backbone and the classifier

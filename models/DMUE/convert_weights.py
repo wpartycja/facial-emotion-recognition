@@ -13,7 +13,7 @@ import torch
 
 def convert(ori_path, dst_path, num_classes):
     num_branches = num_classes + 1
-    state_dict = torch.load(ori_path, map_location=lambda storage,loc: storage.cpu())
+    state_dict = torch.load(ori_path, map_location="cpu")#lambda storage,loc: storage.cpu())
     new_state_dict = OrderedDict()
     for key in state_dict:
         if 'layer4' in key:
@@ -41,8 +41,8 @@ def convert(ori_path, dst_path, num_classes):
 
 
 if __name__ == '__main__':
-    ori_path = "./checkpoints/AffectNet_res18/snapshots/ep7_b3400_acc0.6285.pth"
-    dst_path = "./weights/AffectNet_res18_acc0.6285.pth"
+    ori_path = "./checkpoints/ExpW_res18/snapshots/ep10_acc0.2143.pth"
+    dst_path = "./weights/ExpW_res18_acc.pth"
     num_classes = 8
 
     convert(ori_path, dst_path, num_classes)
