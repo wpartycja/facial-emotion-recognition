@@ -1,0 +1,5 @@
+/log
+/checkpoints
+/models
+/networks/__pycache__
+/datasets
