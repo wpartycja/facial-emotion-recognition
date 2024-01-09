@@ -135,3 +135,6 @@ lb.txt
 lb2.txt
 preprocess/face_alignmenet/ckpt/WFLW_4HG.pth
 pretrain/checkpoints/out_dir_res18/mv_epoch_17.pt
+/ExpW_lmdb
+/RAF_lmdb
+/weights
