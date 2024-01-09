@@ -115,22 +115,22 @@ def main():
                                                                                           std=[0.229, 0.224, 0.225]),
                                                                      transforms.RandomErasing(p=1, scale=(0.05, 0.05))]))
 
-        if args.data_type == 'AffectNet-7':
+        # if args.data_type == 'AffectNet-7':
 
-            train_loader = torch.utils.data.DataLoader(train_dataset,
-                                                       sampler=ImbalancedDatasetSampler(train_dataset),
-                                                       batch_size=args.batch_size,
-                                                       shuffle=False,
-                                                       num_workers=args.workers,
-                                                       pin_memory=True)
+        train_loader = torch.utils.data.DataLoader(train_dataset,
+                                                    sampler=ImbalancedDatasetSampler(train_dataset),
+                                                    batch_size=args.batch_size,
+                                                    shuffle=False,
+                                                    num_workers=args.workers,
+                                                    pin_memory=True)
 
-        else:
+        # else:
 
-            train_loader = torch.utils.data.DataLoader(train_dataset,
-                                                       batch_size=args.batch_size,
-                                                       shuffle=True,
-                                                       num_workers=args.workers,
-                                                       pin_memory=True)
+        #     train_loader = torch.utils.data.DataLoader(train_dataset,
+        #                                                batch_size=args.batch_size,
+        #                                                shuffle=True,
+        #                                                num_workers=args.workers,
+        #                                                pin_memory=True)
 
     test_dataset = datasets.ImageFolder(valdir,
                                         transforms.Compose([transforms.Resize((224, 224)),
