@@ -16,11 +16,11 @@ cfg.image_crop_size = (224, 224)
 cfg.normalize_mean = [0.5, 0.5, 0.5]
 cfg.normalize_std = [0.5, 0.5, 0.5]
 cfg.last_stride = 2
-cfg.num_classes = 8
+cfg.num_classes = 7
 cfg.num_branches = cfg.num_classes + 1
 cfg.backbone = 'resnet18' # 'resnet18', 'resnet50_ibn'
 # cfg.pretrained = "./weights/AffectNet_res18_acc0.6285.pth"
-cfg.pretrained = "./weights/ExpW_res18_acc.pth"
+cfg.pretrained = "./weights/ExpW_now.pth"
 cfg.pretrained_choice = '' # '' or 'convert'
 cfg.bnneck = True  
 cfg.BiasInCls = False
@@ -40,7 +40,7 @@ def inference(model, img_path, transform, is_cuda=True):
     prob = F.softmax(pred, dim=-1)
     idx  = torch.argmax(prob.cpu()).item()
 
-    key = {0: 'Neutral', 1:'Happy', 2:'Sad', 3:'Surprise', 4:'Fear', 5:'Disgust', 6:'Anger', 7:'Contempt'}
+    key = {0: 'angry', 1:'disgust', 2:'fear', 3:'happy', 4:'sad', 5:'surprise', 6:'neutral'}
 
     print('Predicted: {}'.format(key[idx]))
     print('Probabilities:')
@@ -61,9 +61,10 @@ if __name__ == '__main__':
     print('Building model......')
     model = make_target_model(cfg)
     model.load_param(cfg)
+
     print('Loaded pretrained model from {0}'.format(cfg.pretrained))
     start = time.time()
     inference(model, img_path, transform, is_cuda=True)
     end = time.time()
-    print(end - start)
+    print('czas: ', end - start)
     

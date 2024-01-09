@@ -41,8 +41,8 @@ def convert(ori_path, dst_path, num_classes):
 
 
 if __name__ == '__main__':
-    ori_path = "./checkpoints/ExpW_res18/snapshots/ep10_acc0.2143.pth"
-    dst_path = "./weights/ExpW_res18_acc.pth"
-    num_classes = 8
+    ori_path = "./checkpoints/ExpW_res18/snapshots/ep4_acc0.6085.pth"
+    dst_path = "./weights/ExpW_little.pth"
+    num_classes = 7
 
     convert(ori_path, dst_path, num_classes)

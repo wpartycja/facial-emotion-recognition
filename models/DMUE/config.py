@@ -69,7 +69,7 @@ class Config:
     # Optimizer
     # ---------------------------------------------------------------------------- #
     start_epoch = 0
-    max_epoch = 10
+    max_epoch = 40
     weight_decay = 1e-4
 
     # set different lr to the backbone and the classifier

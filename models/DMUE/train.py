@@ -13,6 +13,11 @@ from config import config as cfg
 from models import make_model
 from losses import SoftLoss, SP_KD_Loss
 from utils import write_config_into_log, ramp_up, ramp_down
+from recordmeter import RecorderMeter
+
+import datetime
+now = datetime.datetime.now()
+time_str = now.strftime("[%m-%d]-[%H-%M]-")
 
 
 cfg.output_dir   = os.path.join(cfg.ckpt_root_dir, cfg.output_dir)
@@ -40,7 +45,7 @@ def train():
     # torch.manual_seed(1)
     # torch.cuda.manual_seed(1)
     write_config_into_log(cfg)
-
+    recorder = RecorderMeter(cfg.max_epoch)
     logger.info('Building model......')
     if cfg.pretrained:
         model = make_model(cfg)
@@ -64,9 +69,13 @@ def train():
     train_loader, val_loader = make_dataloader(cfg)
     logger.info('Begin training......')
     for epoch in range(cfg.start_epoch, cfg.max_epoch):
-        train_one_epoch(train_loader, val_loader, model, criterions, optimizer, epoch, cfg)
-
+        softLoss, aux_loss, CEloss, spLoss, total_loss = train_one_epoch(train_loader, val_loader, model, criterions, optimizer, epoch, cfg)
+        # x = train_one_epoch(train_loader, val_loader, model, criterions, optimizer, epoch, cfg)
         total_acc = test(cfg, val_loader, model, epoch)
+        recorder.update_acc(epoch, total_acc)
+        recorder.update_losses(epoch, softLoss, aux_loss, CEloss, spLoss, total_loss)
+        curve_name = time_str + 'cnn.png'
+        recorder.plot_curve(os.path.join('./log/', curve_name))
         with open(cfg.test_log, 'a+') as f:
             f.write('Epoch {0}: Acc is {1:.4f}\n'.format(epoch, total_acc))
         torch.save(obj=model.state_dict(),
@@ -133,6 +142,7 @@ def train_one_epoch(train_loader, val_loader, model, criterions, optimizer, epoc
             logger.info('Model saved')
 
         gc.collect()
+    return softLoss, aux_loss, CEloss, spLoss, loss
 
 
 def test_worker(val_loader, model):

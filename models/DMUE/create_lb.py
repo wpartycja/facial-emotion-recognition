@@ -1,6 +1,8 @@
 import os
 
-directory = '/home/fer/emotions/datasets/ExpW-mini'
+# directory = '/home/fer/emotions/datasets/RAF-DB/DATASET/'
+directory = '/home/fer/emotions/datasets/ExpW_ready/'
+
 file = './lb2.txt'
 
 labels = list()
