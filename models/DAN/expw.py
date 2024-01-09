@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import torch.utils.data as data
 from torchvision import transforms, datasets
+from torchsampler import ImbalancedDatasetSampler
 
 from networks.dan import DAN
 
@@ -32,7 +33,7 @@ def parse_args():
     parser.add_argument('--workers', default=8, type=int, help='Number of data loading workers.')
     parser.add_argument('--epochs', type=int, default=40, help='Total training epochs.')
     parser.add_argument('--num_head', type=int, default=4, help='Number of attention head.')
-    parser.add_argument('--num_class', type=int, default=8, help='Number of class.')
+    parser.add_argument('--num_class', type=int, default=7, help='Number of class.')
     parser.add_argument('--resume', type=str, default=None, metavar='PATH', help='path to checkpoint')
 
 
@@ -85,23 +86,23 @@ class PartitionLoss(nn.Module):
         return loss
 
 
-class ImbalancedDatasetSampler(data.sampler.Sampler):
-    def __init__(self, dataset, indices: list = None, num_samples: int = None):
-        self.indices = list(range(len(dataset))) if indices is None else indices
-        self.num_samples = len(self.indices) if num_samples is None else num_samples
+# class ImbalancedDatasetSampler(data.sampler.Sampler):
+#     def __init__(self, dataset, indices: list = None, num_samples: int = None):
+#         self.indices = list(range(len(dataset))) if indices is None else indices
+#         self.num_samples = len(self.indices) if num_samples is None else num_samples
 
-        df = pd.DataFrame()
-        df["label"] = self._get_labels(dataset)
-        df.index = self.indices
-        df = df.sort_index()
+#         df = pd.DataFrame()
+#         df["label"] = self._get_labels(dataset)
+#         df.index = self.indices
+#         df = df.sort_index()
 
-        label_to_count = df["label"].value_counts()
+#         label_to_count = df["label"].value_counts()
 
-        weights = 1.0 / label_to_count[df["label"]]
+#         weights = 1.0 / label_to_count[df["label"]]
 
-        self.weights = torch.DoubleTensor(weights.to_list())
+#         self.weights = torch.DoubleTensor(weights.to_list())
 
-        # self.weights = self.weights.clamp(min=1e-5)
+#         # self.weights = self.weights.clamp(min=1e-5)
 
     def _get_labels(self, dataset):
         if isinstance(dataset, datasets.ImageFolder):
@@ -181,7 +182,7 @@ def run_training():
     train_loader = torch.utils.data.DataLoader(train_dataset,
                                                batch_size = args.batch_size,
                                                num_workers = args.workers,
-                                            #    sampler=ImbalancedDatasetSampler(train_dataset),
+                                               sampler=ImbalancedDatasetSampler(train_dataset),
                                                shuffle = False, 
                                                pin_memory = True)
 
