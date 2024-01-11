@@ -250,8 +250,7 @@ def evaluate(model, device, val_loader):
             # print(y_pred_test).squeeze().tolist()
             y_pred_list.extend(y_pred_test.squeeze().tolist())
             y_test_list.extend(labels.squeeze().tolist())
-            # print('Pred: ', y_pred_list)
-            # print('Labels: ', y_test_list)
+
 
     expw_to_affect = {0: 6, 1: 5, 2: 4, 3: 1, 4: 2, 5: 3, 6: 0}
     affect_to_expw = {v: k for k, v in expw_to_affect.items()}
@@ -271,32 +270,20 @@ def evaluate(model, device, val_loader):
     print(conf_matrix)
     print(class_report)
 
-    file_name = './evaluate/' + args.evaluate.split('/')[-1].split('.')[0] + '_' + args.data.split('/')[-1] + '_log'
-    txt_name = file_name + '.txt'
-    png_name = file_name + '.png'
+    file_name = args.evaluate.split('/')[-1].split('.')[0] + '_' + args.data.split('/')[-1] + '_log'
+    txt_name = './evaluate/' +  file_name + '.txt'
+    png_name = './evaluate/confusion_matrices/' + file_name + '.png'
+    png_name_n = './evaluate/confusion_matrices_normalized/' + file_name + '.png'
 
-    ConfusionMatrixDisplay.from_predictions(y_test_list_final, y_pred_list, cmap='RdPu')
-    plt.show()
+
+    ConfusionMatrixDisplay.from_predictions(y_test_list_final, y_pred_list, cmap='RdPu', display_labels=target_names)
     plt.savefig(png_name)
+    ConfusionMatrixDisplay.from_predictions(y_test_list_final, y_pred_list, cmap='RdPu', display_labels=target_names, normalize='true')
+    plt.savefig(png_name_n)
     
     with open(txt_name, 'w+') as f:
         f.write(class_report)
-        f.write(str(conf_matrix))
 
-    
-            
-            # _, preds = torch.max(outs,1)
-            # idxs = [int(pred) for pred in preds]
-
-            # print(idxs)
-            # print(labels)
-            # for idx, label in zip(idxs, labels):
-            #     if idx == label:
-            #         correct += 1
-            # total += labels.size(0)
-
-    # print(f'Accuracy: {round(100*correct/total, 2)}')
-    # return round(100*correct/total, 2)
 
 
 if __name__ == '__main__':
