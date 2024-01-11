@@ -20,6 +20,7 @@ import numpy as np
 import datetime
 from torchsampler import ImbalancedDatasetSampler
 from models.PosterV2_7cls import *
+from sklearn.metrics import classification_report
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -28,7 +29,7 @@ time_str = now.strftime("[%m-%d]-[%H-%M]-")
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data', type=str, default=r'/home/Dataset/RAF')
-parser.add_argument('--data_type', default='RAF-DB', choices=['RAF-DB', 'AffectNet-7', 'CAER-S'],
+parser.add_argument('--data_type', default='RAF-DB', choices=['RAF-DB', 'AffectNet-7', 'ExpW'],
                         type=str, help='dataset option')
 parser.add_argument('--checkpoint_path', type=str, default='./checkpoint/' + time_str + 'model.pth')
 parser.add_argument('--best_checkpoint_path', type=str, default='./checkpoint/' + time_str + 'model_best.pth')
@@ -157,7 +158,9 @@ def main():
             print("=> loaded checkpoint '{}' (epoch {})".format(args.evaluate, checkpoint['epoch']))
         else:
             print("=> no checkpoint found at '{}'".format(args.evaluate))
-        validate(val_loader, model, criterion, args)
+        
+        # validate(val_loader, model, criterion, args)
+        evaluate(model, val_loader, args) 
         return
 
     matrix = None
@@ -258,6 +261,58 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             progress.display(i)
 
     return top1.avg, losses.avg
+
+
+def evaluate(model, val_loader, args):
+
+    y_pred_list = []
+    y_test_list = []
+
+    model.eval()
+
+    if args.data_type == 'AffectNet':
+        target_names = ["neutral", 'happy', 'sad', 'surprise', 'fear', 'disgust', 'angry']
+    elif args.data_type == 'ExpW':
+        target_names = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
+    else:
+        target_names = ['surprise', 'fear', 'disgust', 'happy', 'sad', 'angry', 'neutral']
+
+    with torch.no_grad():
+        for data in val_loader:
+
+            images, labels = data
+            images = images.cuda()
+            labels = labels.cuda()
+
+            # calculate outputs by running images through the network 
+            outputs = model(images) 
+
+            y_pred_test = torch.argmax(outputs, dim=1)
+            y_pred_list.extend(y_pred_test.squeeze().tolist())
+            y_test_list.extend(labels.squeeze().tolist())
+
+    expw_to_affect = {0: 6, 1: 5, 2: 4, 3: 1, 4: 2, 5: 3, 6: 0}
+    affect_to_expw = {v: k for k, v in expw_to_affect.items()}
+
+    expw_to_raf = {0: 5, 1: 2, 2: 1, 3: 3, 4: 4, 5: 0, 6: 6}
+    raf_to_expw = {v: k for k, v in expw_to_raf.items()}
+
+    affect_to_raf = {0: 6, 1: 3, 2: 4, 3: 0, 4: 1, 5: 2, 6: 5}
+    raf_to_affect = {v: k for k, v in affect_to_raf.items()}
+
+
+    y_test_list_final = y_test_list
+    y_test_list_final = [expw_to_affect[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
+
+    print(classification_report(y_pred_list, y_test_list_final, target_names = target_names))
+
+    txt_name = './evaluate/' + args.evaluate.split('/')[-1].split('.')[0] + '_' + args.data.split('/')[-1] + '_log.txt'
+    with open(txt_name, 'w+') as f:
+        f.write(classification_report(y_pred_list, y_test_list_final, target_names = target_names))
+    
+    # return y_pred_list, y_test_list_final
+
+
 
 
 def validate(val_loader, model, criterion, args):
@@ -521,3 +576,6 @@ class RecorderMeter(object):
 
 if __name__ == '__main__':
     main()
+
+
+
