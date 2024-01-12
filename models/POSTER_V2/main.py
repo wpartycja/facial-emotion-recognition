@@ -21,6 +21,8 @@ import datetime
 from torchsampler import ImbalancedDatasetSampler
 from models.PosterV2_7cls import *
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -47,6 +49,10 @@ parser.add_argument('--resume', default=None, type=str, metavar='PATH', help='pa
 parser.add_argument('-e', '--evaluate', default=None, type=str, help='evaluate model on test set')
 parser.add_argument('--beta', type=float, default=0.6)
 parser.add_argument('--gpu', type=str, default='0')
+
+parser.add_argument('--model_type', default='RAF-DB', choices=['RAF-DB', 'AffectNet', 'ExpW'],
+                        type=str, help='dataset option')
+
 args = parser.parse_args()
 
 
@@ -270,9 +276,9 @@ def evaluate(model, val_loader, args):
 
     model.eval()
 
-    if args.data_type == 'AffectNet':
+    if args.model_type == 'AffectNet':
         target_names = ["neutral", 'happy', 'sad', 'surprise', 'fear', 'disgust', 'angry']
-    elif args.data_type == 'ExpW':
+    elif args.model_type == 'ExpW':
         target_names = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
     else:
         target_names = ['surprise', 'fear', 'disgust', 'happy', 'sad', 'angry', 'neutral']
@@ -302,16 +308,27 @@ def evaluate(model, val_loader, args):
 
 
     y_test_list_final = y_test_list
-    y_test_list_final = [expw_to_affect[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
+    y_test_list_final = [affect_to_raf[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
 
-    print(classification_report(y_pred_list, y_test_list_final, target_names = target_names))
 
-    txt_name = './evaluate/' + args.evaluate.split('/')[-1].split('.')[0] + '_' + args.data.split('/')[-1] + '_log.txt'
-    with open(txt_name, 'w+') as f:
-        f.write(classification_report(y_pred_list, y_test_list_final, target_names = target_names))
+    conf_matrix = confusion_matrix(y_pred_list, y_test_list_final, labels=[0,1,2,3,4,5,6] )
+    class_report = classification_report(y_pred_list, y_test_list_final, target_names = target_names) 
+    print(conf_matrix)
+    print(class_report)
+
+    file_name = args.evaluate.split('/')[-1].split('.')[0] + '_' + args.data.split('/')[-1] + '_log'
+    txt_name = './evaluate/' +  file_name + '.txt'
+    png_name = './evaluate/confusion_matrices/' + file_name + '.png'
+    png_name_n = './evaluate/confusion_matrices_normalized/' + file_name + '.png'
+
+
+    ConfusionMatrixDisplay.from_predictions(y_test_list_final, y_pred_list, cmap='RdPu', display_labels=target_names)
+    plt.savefig(png_name)
+    ConfusionMatrixDisplay.from_predictions(y_test_list_final, y_pred_list, cmap='RdPu', display_labels=target_names, normalize='true')
+    plt.savefig(png_name_n)
     
-    # return y_pred_list, y_test_list_final
-
+    with open(txt_name, 'w+') as f:
+        f.write(class_report)
 
 
 
