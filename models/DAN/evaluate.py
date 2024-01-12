@@ -14,7 +14,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 parser = argparse.ArgumentParser()
 parser.add_argument('--image', type=str, help='Image file for evaluation.')
 parser.add_argument('--evaluate', type=str, help='path to model checkpoint')
-parser.add_argument('--data_type', type=str, help='Type of data, AffectNet-7, RAF-DB, ExpW',  choices=['RAF-DB', 'AffectNet-7', 'ExpW'])
+parser.add_argument('--model_type', type=str, help='Type of data, AffectNet, RAF-DB, ExpW',  choices=['RAF-DB', 'AffectNet', 'ExpW'])
 parser.add_argument('--batch_size', type=int, default=16, help='Batch size')
 parser.add_argument('--data', type=str, help='path to dataset')
 parser.add_argument('--lr', type=float, default=0.0001, help='Initial learning rate for adam.')
@@ -217,7 +217,7 @@ def create_loader(transform, args):
     valset = torchvision.datasets.ImageFolder(args.data+'/valid', transform)
 
     val_loader = torch.utils.data.DataLoader(
-        valset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True
+        valset, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True
     )
     return val_loader
     # classes = valset.find_classes('./ExpW-mini/valid')[0]
@@ -230,9 +230,9 @@ def evaluate(model, device, val_loader):
     model.eval()
 
 
-    if args.data_type == 'AffectNet':
+    if args.model_type == 'AffectNet':
         target_names = ["neutral", 'happy', 'sad', 'surprise', 'fear', 'disgust', 'angry']
-    elif args.data_type == 'ExpW':
+    elif args.model_type == 'ExpW':
         target_names = ['angry', 'disgust', 'fear', 'happy', 'sad', 'surprise', 'neutral']
     else:
         target_names = ['surprise', 'fear', 'disgust', 'happy', 'sad', 'angry', 'neutral']
@@ -263,7 +263,7 @@ def evaluate(model, device, val_loader):
 
 
     y_test_list_final = y_test_list
-    y_test_list_final = [raf_to_expw[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
+    y_test_list_final = [affect_to_expw[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
 
     conf_matrix = confusion_matrix(y_pred_list, y_test_list_final, labels=[0,1,2,3,4,5,6] )
     class_report = classification_report(y_pred_list, y_test_list_final, target_names = target_names) 
@@ -323,12 +323,12 @@ if __name__ == '__main__':
     print("=> loading checkpoint '{}'".format(args.evaluate))
     checkpoint = torch.load(args.evaluate, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'], strict=True)
-    start_epoch = checkpoint['iter']
+    # start_epoch = checkpoint['iter']
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    print(checkpoint['best_accuracy'])
-    best_acc = checkpoint['best_accuracy']
-    recorder = checkpoint['recorder']
-    recorder1 = checkpoint['recorder1']
+    # print(checkpoint['best_accuracy'])
+    # best_acc = checkpoint['best_accuracy']
+    # recorder = checkpoint['recorder']
+    # recorder1 = checkpoint['recorder1']
     print("=> loaded checkpoint '{}' (epoch {})".format(args.evaluate, checkpoint['iter']))
        
     print('Loaded pretrained model')
