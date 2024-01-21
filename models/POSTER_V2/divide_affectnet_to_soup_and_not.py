@@ -1,27 +1,18 @@
+import os
+# from PIL import Image
 import shutil
 import warnings
-from sklearn import metrics
-from sklearn.metrics import confusion_matrix, plot_confusion_matrix
 warnings.filterwarnings("ignore")
 import torch.utils.data as data
 import os
 import argparse
-from sklearn.metrics import f1_score, confusion_matrix
-from data_preprocessing.sam import SAM
 import torch.nn.parallel
-import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 import torch.utils.data.distributed
-import matplotlib.pyplot as plt
-import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-import numpy as np
 import datetime
-from torchsampler import ImbalancedDatasetSampler
 from models.PosterV2_7cls import *
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from PIL import Image
 import time
 
@@ -60,9 +51,22 @@ args = parser.parse_args()
 
 
 def main():
-    directory = '../../../datasets/RAF-DB/train'
-    out_directory = '../../../datasets/soup_raf_by_student1'
     model_checkpoint = './checkpoint/student1_best.pth'
+    directory = '../../../datasets/AffectNet_clean/train'
+    out_directory_soup = '../../../datasets/soup_affectnet_by_student1'
+    out_directory_not_soup = '../../../datasets/affectnet_not_in_soup'
+
+    affect_to_raf = {0: 6, 1: 3, 2: 4, 3: 0, 4: 1, 5: 2, 6: 5}
+
+    proportion = {0: 21103,
+                1: 37885,
+                2: 7176,
+                3: 3971,
+                4: 1798,
+                5: 1072,
+                6: 7013
+                }
+
 
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -105,32 +109,38 @@ def main():
 
     for classy in os.listdir(directory):
         print("Start of class ", classy)
-        start = time.time()
+        raf_class = affect_to_raf[int(classy)]
         class_path = f'{directory}/{classy}'
-        for idx, filename in enumerate(os.listdir(class_path)):
+        start = time.time()
+        i = 0
+        stop_num = proportion[int(classy)]
+        for filename in os.listdir(class_path):
             fullpath = os.path.join(class_path, filename)
-            img0 = Image.open(fullpath).convert('RGB')
-            img = data_transforms(img0)
-            img = img.view(1,3,224,224)
-            img = img.to(device)
+            if i < stop_num:
+                img0 = Image.open(fullpath).convert('RGB')
+                img = data_transforms(img0)
+                img = img.view(1,3,224,224)
+                img = img.to(device)
 
-            with torch.set_grad_enabled(False):
-                out = model(img)
-                # print('out: ', out)
-                pred = torch.argmax(out,1)
-                # print('pred: ', pred)
-                index = int(pred)
-                # print(index)
+                with torch.set_grad_enabled(False):
+                    out = model(img)
+                    # print('out: ', out)
+                    pred = torch.argmax(out,1)
+                    # print('pred: ', pred)
+                    index = int(pred)
+                    # print(index)
 
-            img0.save(f'{out_directory}/{index}/{idx}.png')
-            i+=1
+                img0.save(f'{out_directory_soup}/{index}/{i}.png')
+            
+            else:
+                shutil.copyfile(fullpath, f'{out_directory_not_soup}/{raf_class}/{filename}.png')
+            
+            i += 1
         end = time.time()
-        print(f"End of class {classy}, exec time: {end-start}, number of images: {idx}")
-        print("")
-    end_whole = time.time()
-    print("Number of images: ", i)
-    print("Exec time: ", end_whole-start_whole)
+        print(f"End of class {classy}, exec time: {end-start}, number of images: {i}")
 
+    end_whole = time.time()
+    print("Exec time: ", end_whole-start_whole)
 
 if __name__ == '__main__':
     main()

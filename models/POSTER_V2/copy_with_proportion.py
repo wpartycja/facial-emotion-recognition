@@ -2,8 +2,8 @@ import os
 # from PIL import Image
 import shutil
 
-directory = '../../../datasets/AffectNet_clean/train'
-out_directory = '../../../datasets/AffectNet_midi'
+directory = '../../../datasets/affectnet_not_in_soup'
+out_directory = '../../../datasets/soup_main_2'
 
 affect_to_raf = {0: 6, 1: 3, 2: 4, 3: 0, 4: 1, 5: 2, 6: 5}
 
@@ -23,7 +23,7 @@ for classy in os.listdir(directory):
     i = 0
     for filename in os.listdir(class_path):
         fullpath = os.path.join(class_path, filename)
-        shutil.copyfile(fullpath, f'{out_directory}/{raf_class}/{filename}.png')
+        shutil.copyfile(fullpath, f'{out_directory}/{raf_class}/aff_{filename}')
         i += 1
         if i == proportion[int(classy)]:
             break 
