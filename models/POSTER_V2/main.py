@@ -23,6 +23,9 @@ from models.PosterV2_7cls import *
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -53,7 +56,18 @@ parser.add_argument('--gpu', type=str, default='0')
 parser.add_argument('--model_type', default='RAF-DB', choices=['RAF-DB', 'AffectNet', 'ExpW'],
                         type=str, help='dataset option')
 
+parser.add_argument('--noisy', action=argparse.BooleanOptionalAction)
+
+
 args = parser.parse_args()
+
+
+class TransformsNoisy:
+    def __init__(self, transforms: A.Compose):
+        self.transforms = transforms
+
+    def __call__(self, img, *args, **kwargs):
+        return self.transforms(image=np.array(img))
 
 
 def main():
@@ -105,25 +119,47 @@ def main():
 
     if args.evaluate is None:
 
-        if args.data_type == 'RAF-DB':
-            train_dataset = datasets.ImageFolder(traindir,
-                                                 transforms.Compose([transforms.Resize((224, 224)),
-                                                                     transforms.RandomHorizontalFlip(),
-                                                                     transforms.ToTensor(),
-                                                                     transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                                          std=[0.229, 0.224, 0.225]),
-                                                                     transforms.RandomErasing(scale=(0.02, 0.1))]))
+        if args.noisy:
+
+            one_of = A.OneOf([
+                                A.CLAHE(tile_grid_size=(32, 32), p=1),
+                                A.Equalize(p=1),
+                                A.InvertImg(p=1),
+                                A.Rotate(p=1),
+                                A.Posterize(p=1),
+                                A.Solarize(p=1),
+                                A.ColorJitter(p=1),
+                                A.RandomContrast(p=1),
+                                A.RandomBrightnessContrast(contrast_limit=0, p=1),
+                                A.Sharpen(p=1),
+                                A.GridDistortion(p=1),
+                                A.OpticalDistortion(p=1),
+                                A.ShiftScaleRotate(p=1),
+                                A.Cutout(p=1)
+                            ], p=1)
+
+            compose = A.Compose([A.Resize(224, 224),
+                                   one_of,
+                                   one_of,
+                                   A.CoarseDropout(p=0.5),
+                                   A.Normalize(mean=[0.485, 0.456, 0.406],
+                                               std=[0.229, 0.224, 0.225]),
+                                
+                                   ToTensorV2()])
+            transform = TransformsNoisy(compose)
+
         else:
-            train_dataset = datasets.ImageFolder(traindir,
-                                                 transforms.Compose([transforms.Resize((224, 224)),
-                                                                     transforms.RandomHorizontalFlip(),
-                                                                     transforms.ToTensor(),
-                                                                     transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                                                          std=[0.229, 0.224, 0.225]),
-                                                                     transforms.RandomErasing(p=1, scale=(0.05, 0.05))]))
+            transform = transforms.Compose([transforms.Resize((224, 224)),
+                                            transforms.RandomHorizontalFlip(),
+                                            transforms.ToTensor(),
+                                            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                                std=[0.229, 0.224, 0.225]),
+                                            transforms.RandomErasing(p=1, scale=(0.05, 0.05))])
 
-        # if args.data_type == 'AffectNet-7':
 
+
+        train_dataset = datasets.ImageFolder(traindir, transform)
+        
         train_loader = torch.utils.data.DataLoader(train_dataset,
                                                     sampler=ImbalancedDatasetSampler(train_dataset),
                                                     batch_size=args.batch_size,
@@ -131,22 +167,12 @@ def main():
                                                     num_workers=args.workers,
                                                     pin_memory=True)
 
-        # else:
-
-        #     train_loader = torch.utils.data.DataLoader(train_dataset,
-        #                                                batch_size=args.batch_size,
-        #                                                shuffle=True,
-        #                                                num_workers=args.workers,
-        #                                                pin_memory=True)
-
     test_dataset = datasets.ImageFolder(valdir,
                                         transforms.Compose([transforms.Resize((224, 224)),
                                                             transforms.ToTensor(),
                                                             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                                  std=[0.229, 0.224, 0.225]),
                                                             ]))
-
-
     val_loader = torch.utils.data.DataLoader(test_dataset,
                                              batch_size=args.batch_size,
                                              shuffle=False,
@@ -228,7 +254,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
     for i, (images, target) in enumerate(train_loader):
         # print(images.shape)
-        images = images.cuda()
+        images = images['image'].cuda()
         target = target.cuda()
 
         # compute output
@@ -307,7 +333,7 @@ def evaluate(model, val_loader, args):
     raf_to_affect = {v: k for k, v in affect_to_raf.items()}
 
 
-    y_test_list_final = y_test_list
+    y_test_list_final = y_test_list  # expw_to_raf
     y_test_list_final = [affect_to_raf[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
 
 
