@@ -24,18 +24,18 @@ class Config:
     num_classes = 7
     ori_shape = (256, 256)
     label_path = "lb2.txt"
-    lmdb_f = "ExpW_lmdb"
+    lmdb_f = "RAF_lmdb"
 
     train_dataset, val_dataset = parse_lb_txt(label_path)
-    w, T = 0.5, 1.2
+    w, T = 0.4, 1.2
     gamma = 1000
-    ramp_a = 6 # affectnet 4/6; ferplus 10/12/14; raf 9/10
+    ramp_a = 9 # affectnet 4/6; ferplus 10/12/14; raf 9/10
 
     batch_size = 72
     test_minibatch=16
     num_workers = 4
-    lr1 = [[6, 0.0001], [12, 0.00005], [20, 0.00001], [22, 0.00001], [25, 0.00005], [60, 0.00001]]
-    lr2 = [[4, 0.001], [8, 0.0005], [14, 0.0001], [22, 0.00001], [25, 0.00005], [60, 0.00001]]
+    lr1 = [[6, 0.00001], [12, 0.000005], [20, 0.000001], [22, 0.000001], [25, 0.000005], [60, 0.000001]]
+    lr2 = [[4, 0.0001], [8, 0.00005], [14, 0.00001], [22, 0.000001], [25, 0.000005], [60, 0.000001]]
     bnneck = True # False for resnet50_ibn
     use_dropout = True
     BiasInCls = False
@@ -44,7 +44,7 @@ class Config:
     second_order_statics = 'mean' # all, mean, var
     # -----------saving dirs-------#
     ckpt_root_dir = './checkpoints'
-    output_dir = 'ExpW_res18'
+    output_dir = './checkpoints/RAF_res18'
     # ---------------------------------------------------------------------------- #
     # Input
     # ---------------------------------------------------------------------------- #
@@ -72,7 +72,7 @@ class Config:
     # ---------------------------------------------------------------------------- #
     start_epoch = 0
     max_epoch = 40
-    weight_decay = 1e-4
+    weight_decay = 1e-5
 
     # set different lr to the backbone and the classifier
     def get_lr(self, epoch):

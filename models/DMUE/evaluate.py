@@ -82,7 +82,7 @@ def evaluate(device, val_loader):
     raf_to_affect = {v: k for k, v in affect_to_raf.items()}
 
     y_test_list_final = y_test_list
-    # y_test_list_final = [affect_to_raf[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
+    # y_test_list_final = [affect_to_expw[elem] for elem in y_test_list] # tu zmieniamy labelki z datasetowych na modelowe
 
 
     conf_matrix = confusion_matrix(y_pred_list, y_test_list_final, labels=[0,1,2,3,4,5,6] )
@@ -90,7 +90,7 @@ def evaluate(device, val_loader):
     print(conf_matrix)
     print(class_report)
 
-    file_name = cfg.pretrained.split('/')[-1].split('.')[0] + '_' + cfg.data_path.split('/')[-1] + '_log'
+    file_name = cfg.pretrained.split('/')[-1].split('.')[0] + '_' + cfg.data_path.split('/')[-2] + '_log'
     txt_name = './evaluate/' +  file_name + '.txt'
     png_name = './evaluate/confusion_matrices/' + file_name + '.png'
     png_name_n = './evaluate/confusion_matrices_normalized/' + file_name + '.png'
