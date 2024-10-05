@@ -1,10 +1,12 @@
+from pathlib import Path
+import numpy as np
 import cv2
 import dlib
 import os
-from pathlib import Path
 
+# @TODO: dokonczyc typehinty
 
-def load_img(path):
+def load_img(path: str) -> tuple[np.ndarray, np.ndarray]:
     """
     loads image and changes channel colour
     """
@@ -13,28 +15,27 @@ def load_img(path):
     return img, rgb
 
 
-def convert_and_trim_bb(image, rect):
+def convert_and_trim_bb(image: np.ndarray, rect):
     """
     reads bounding box corner coordinates
     and converts it to coordinates of left upper corner
     and width and height
     """
-    # extract the starting and ending (x, y)-coordinates of the
-    # bounding box
+    
     startX = rect.left()
     startY = rect.top()
     endX = rect.right()
     endY = rect.bottom()
-    # ensure the bounding box coordinates fall within the spatial
-    # dimensions of the image
+    
     startX = max(0, startX)
     startY = max(0, startY)
     endX = min(endX, image.shape[1])
     endY = min(endY, image.shape[0])
+    
     # compute the width and height of the bounding box
     w = endX - startX
     h = endY - startY
-    # return our bounding box coordinates
+    
     return (startX, startY, w, h)
 
 
@@ -43,7 +44,7 @@ def cnn_crop(path, save_path):
     detects face from image using cnn algorithm
     """
     img, rgb = load_img(path)
-    cnn_detector = dlib.cnn_face_detection_model_v1("mmod_human_face_detector.dat")
+    cnn_detector = dlib.cnn_face_detection_model_v1("./input/mmod_human_face_detector.dat")
     cnn_rects = cnn_detector(rgb, 1)
 
     cnn_boxes = [convert_and_trim_bb(img, r.rect) for r in cnn_rects] # coordinates of faces bb
