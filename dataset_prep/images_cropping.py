@@ -1,10 +1,19 @@
 from pathlib import Path
 import numpy as np
+from IPython.display import Image, display
+import time
 import cv2
 import dlib
 import os
 
+output = '/faces/output.png'
+
 # @TODO: dokonczyc typehinty
+
+def show_img(img):
+    cv2.imwrite(output, img)
+    display(Image(filename=output, width=800, height=600))
+    return
 
 def load_img(path: str) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -60,6 +69,21 @@ def cnn_crop(path, save_path):
             pass
         cv2.imwrite(f"{save_path}{filename}_{count}.png", img_new)
         count += 1
+
+# @TODO: apply version for multiple faces
+def haarcascade(path):
+    img, gray, rgb = load_img(path)
+    haar_detector = cv2.CascadeClassifier(cv2.data.haarcascades+"haarcascade_frontalface_default.xml")
+    start = time.perf_counter()
+    rects = haar_detector.detectMultiScale(gray, scaleFactor=1.05,
+	                                minNeighbors=5, minSize=(30, 30),
+	                                flags=cv2.CASCADE_SCALE_IMAGE)
+    img_haar = img.copy()
+    for (x, y, w, h) in rects:
+        cv2.rectangle(img_haar, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    finish = time.perf_counter()
+    print("Time Haarcascade: " + str((finish - start)))
+    return img_haar
 
 
 if __name__ == "__main__":
