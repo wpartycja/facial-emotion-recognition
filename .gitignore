@@ -1,3 +1,4 @@
 coords.txt
 /__pycache__
 /affectnet_experiments/*.csv
+/app_feraina/server/raf_best.onnx
