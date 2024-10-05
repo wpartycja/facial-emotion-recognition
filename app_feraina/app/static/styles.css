@@ -1,0 +1,47 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #ffd9e8;  /* fde6e6 - Light pinkish background */
+}
+
+.container {
+    padding: 20px;
+    background-color: #fff;  /* White container background */
+    border-radius: 10px;  /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Light shadow */
+    text-align: center;
+}
+
+h2 {
+    color: #333;
+}
+
+p {
+    color: #555;  /* Darker gray text */
+    margin-bottom: 20px;
+}
+
+
+button, .custom-button {
+    margin-top: 10px;  /* Add space on top of the button */
+    padding: 10px;
+    background-color: #ff66b2;  /* Soft pastel pink button color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover, .custom-button:hover {
+    background-color: #ff3385;  /* Darker pink on hover */
+}
+
+img {
+    padding: 10px
+}

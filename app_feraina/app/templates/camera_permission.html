@@ -1,0 +1,34 @@
+<!-- camera_permission.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feraina - Welcome</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Welcome to Feraina -<br>AI facial emotion recognition app!</h2>
+        <p>Please grant permission to use the camera.</p>
+        <button id="grantPermission">Grant Permission</button>
+    </div>
+
+    <script>
+        document.getElementById('grantPermission').addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                localStorage.removeItem('buttonState');
+                window.location.href = '/go';  // Redirect to /go after permission is granted
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                alert('Failed to grant camera permission.');
+            }
+        });
+    </script>
+</body>
+
+</html>

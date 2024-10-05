@@ -1,0 +1,55 @@
+<!-- index1.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feraina</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon_zapasowy.ico') }}" type="image/x-icon">
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="mt-5">Have fun with Feraina -<br>solo or together!</h2>
+        <form id="stopStartForm" method="post" action="{{ url_for('tasks') }}">
+            <input class="custom-button" id="stopStartButton" type="submit" value="Start" name="stop" />
+        </form>
+        <img src="{{ url_for('video_feed') }}" height="80%">
+        <h3 style="font-family:courier;">Instructions:</h3>
+        <ol style="font-family:courier;">
+            <li>Stop/Start - Toggle between stop or start live streaming</li>
+        </ol>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const stopStartForm = document.getElementById('stopStartForm');
+            const stopStartButton = document.getElementById('stopStartButton');
+
+            // Check if a button state is stored in local storage
+            const storedState = localStorage.getItem('buttonState');
+            if (storedState) {
+                // Adjust the check to look for "Start" instead of "Stop"
+                stopStartButton.value = (storedState === 'Stop') ? 'Stop' : 'Start';
+            }
+
+            stopStartForm.addEventListener('submit', (event) => {
+                // Prevent the form from submitting and reloading the page
+                event.preventDefault();
+
+                // Toggle the button value between 'Stop' and 'Start'
+                stopStartButton.value = (stopStartButton.value === 'Stop') ? 'Start' : 'Stop';
+
+                // Store the button state in local storage
+                localStorage.setItem('buttonState', stopStartButton.value);
+
+                // Manually submit the form
+                stopStartForm.submit();
+            });
+        });
+    </script>
+</body>
+
+</html>
