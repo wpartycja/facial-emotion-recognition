@@ -62,9 +62,9 @@ def train():
                                  weight_decay=cfg.weight_decay)
     
     celoss = nn.CrossEntropyLoss().cuda()
-    softloss = SoftLoss()
+    softLoss = SoftLoss()
     sp_kd_loss = SP_KD_Loss()
-    criterions = [celoss, softloss, sp_kd_loss]
+    criterions = [celoss, softLoss, sp_kd_loss]
 
     train_loader, val_loader = make_dataloader(cfg)
     logger.info('Begin training......')

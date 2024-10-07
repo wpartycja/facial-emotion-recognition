@@ -29,9 +29,9 @@ class Config:
     train_dataset, val_dataset = parse_lb_txt(label_path)
     w, T = 0.4, 1.2
     gamma = 1000
-    ramp_a = 9 # affectnet 4/6; ferplus 10/12/14; raf 9/10
+    ramp_a = 910# affectnet 4/6; ferplus 10/12/14; raf 9/10
 
-    batch_size = 72
+    batch_size = 12
     test_minibatch=16
     num_workers = 4
     lr1 = [[6, 0.00001], [12, 0.000005], [20, 0.000001], [22, 0.000001], [25, 0.000005], [60, 0.000001]]
